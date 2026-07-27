@@ -44,6 +44,18 @@ For Microsoft Edge, use `edge://extensions`, enable **Developer mode**, select
 The archive is suitable for Chrome Web Store submission as well. Upload the same
 versioned ZIP from the Chrome Developer Dashboard.
 
+## GitHub releases
+
+The CI workflow runs checks, builds the ZIP, and uploads it as a workflow artifact
+for pushes to `main` and pull requests. Pushing a version tag matching the package
+version (for example, `v1.0.0`) runs the release workflow, which creates or updates
+the matching GitHub Release and attaches the store-ready ZIP.
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ## Development
 
 ```sh
