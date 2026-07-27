@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "package": "node scripts/package.mjs",
     "test": "node --test",
     "check": "npm run test && npm run build"
   },
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.25.0",
-    "jsdom": "^26.0.0"
+    "jsdom": "^26.0.0",
+    "yazl": "^3.3.1"
   }
 }
