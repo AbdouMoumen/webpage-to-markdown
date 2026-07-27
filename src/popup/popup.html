@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page to Markdown</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <header>
+        <p class="eyebrow">PAGE TO MARKDOWN</p>
+        <h1>Clean Markdown</h1>
+        <p id="status" class="status" role="status">Preparing page conversion...</p>
+      </header>
+
+      <label class="output-label" for="markdown">Markdown preview</label>
+      <textarea id="markdown" spellcheck="false" aria-label="Editable Markdown output" placeholder="Your converted page will appear here." disabled></textarea>
+
+      <div class="actions">
+        <button id="convert" class="secondary" type="button">Convert again</button>
+        <button id="copy" type="button" disabled>Copy Markdown</button>
+        <button id="download" type="button" disabled>Download .md</button>
+      </div>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

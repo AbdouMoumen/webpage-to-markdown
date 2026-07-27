@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Page to Markdown",
+  "version": "1.0.0",
+  "description": "Convert the current page into clean, editable Markdown.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_title": "Page to Markdown",
+    "default_popup": "popup.html"
+  }
+}
