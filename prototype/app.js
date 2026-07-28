@@ -1,20 +1,36 @@
 const popup = document.querySelector("#popup");
 const closedState = document.querySelector("#closed-state");
 const activityStatus = document.querySelector("#activity-status");
+const dialogActivityStatus = document.querySelector("#dialog-activity-status");
 const markdown = document.querySelector("#markdown");
 const preview = document.querySelector("#preview-panel");
 const editorDialog = document.querySelector("#editor-dialog");
 const dialogMarkdown = document.querySelector("#dialog-markdown");
 const dialogPreview = document.querySelector("#dialog-preview");
-let statusTimeout;
+const statusTimeouts = new Map();
 
-function showActivity(message) {
-  window.clearTimeout(statusTimeout);
-  activityStatus.textContent = message;
-  activityStatus.hidden = false;
-  statusTimeout = window.setTimeout(() => {
-    activityStatus.hidden = true;
-  }, 2400);
+function showActivity(element, message) {
+  window.clearTimeout(statusTimeouts.get(element));
+  element.textContent = message;
+  element.hidden = false;
+  statusTimeouts.set(element, window.setTimeout(() => {
+    element.hidden = true;
+  }, 2400));
+}
+
+async function copyMarkdown(source, statusElement) {
+  try {
+    await navigator.clipboard.writeText(source.value);
+    showActivity(statusElement, "Markdown copied to the clipboard.");
+  } catch (error) {
+    source.focus();
+    source.select();
+    const copied = document.execCommand("copy");
+    showActivity(
+      statusElement,
+      copied ? "Markdown copied to the clipboard." : "Clipboard access was unavailable. Select the Markdown and copy it manually."
+    );
+  }
 }
 
 function escapeHtml(value) {
@@ -77,19 +93,11 @@ function downloadMarkdown() {
 }
 
 document.querySelector("#start-picker").addEventListener("click", () => {
-  showActivity("Element picker activated (prototype simulation).");
+  showActivity(activityStatus, "Element picker activated (prototype simulation).");
 });
 
 document.querySelector("#copy").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(markdown.value);
-    showActivity("Markdown copied to the clipboard.");
-  } catch {
-    markdown.focus();
-    markdown.select();
-    document.execCommand("copy");
-    showActivity("Markdown copied to the clipboard.");
-  }
+  await copyMarkdown(markdown, activityStatus);
 });
 
 document.querySelector("#edit-tab").addEventListener("click", () => {
@@ -125,6 +133,9 @@ editorDialog.addEventListener("close", () => {
 });
 
 document.querySelector("#download").addEventListener("click", downloadMarkdown);
+document.querySelector("#dialog-copy").addEventListener("click", async () => {
+  await copyMarkdown(dialogMarkdown, dialogActivityStatus);
+});
 document.querySelector("#dialog-download").addEventListener("click", () => {
   markdown.value = dialogMarkdown.value;
   editorDialog.close();

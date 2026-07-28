@@ -79,9 +79,11 @@ Turn a focused section of any page into clean, portable notes.
           <button id="dialog-edit-tab" class="tab active" type="button" role="tab" aria-selected="true">Edit Markdown</button>
           <button id="dialog-preview-tab" class="tab" type="button" role="tab" aria-selected="false">Rendered Preview</button>
         </div>
+        <p id="dialog-activity-status" class="activity-status" role="status" hidden></p>
         <textarea id="dialog-markdown" aria-label="Expanded editable Markdown"></textarea>
         <article id="dialog-preview" class="dialog-preview" hidden></article>
         <footer class="dialog-actions">
+          <button id="dialog-copy" class="subtle-button" type="button">Copy Markdown</button>
           <button id="dialog-download" class="primary-button" type="button">Download .md</button>
           <button value="cancel" class="subtle-button">Close</button>
         </footer>
