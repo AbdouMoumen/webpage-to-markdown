@@ -8,11 +8,11 @@ manifest, runtime code, or build output.
 From the repository root, run:
 
 ```sh
-npx --yes serve prototype --listen 4173
+npx --yes vite prototype --host 127.0.0.1 --port 4173
 ```
 
-Open [http://localhost:4173](http://localhost:4173). The server watches the static
-files, so refresh the page after editing `index.html`, `styles.css`, or `app.js`.
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173). Vite provides hot reload for
+changes to `index.html`, `styles.css`, and `app.js` without adding a project dependency.
 
 ## Prototype interactions
 
