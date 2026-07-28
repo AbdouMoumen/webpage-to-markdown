@@ -16,7 +16,7 @@ changes to `index.html`, `styles.css`, and `app.js` without adding a project dep
 
 ## Prototype interactions
 
-- Enter a CSS selector and apply it, or start the mocked visual picker.
+- Use the compact pick-element icon beside the expand control to trigger mocked picker feedback.
 - Switch between editable Markdown and locally rendered preview tabs.
 - Use the expand icon to open the large editor dialog, including its own tabs.
 - Start a `.md` download. The prototype downloads the file and then replaces the

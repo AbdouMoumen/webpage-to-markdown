@@ -1,13 +1,21 @@
 const popup = document.querySelector("#popup");
 const closedState = document.querySelector("#closed-state");
-const selector = document.querySelector("#selector");
-const selectorMessage = document.querySelector("#selector-message");
-const pickerStatus = document.querySelector("#picker-status");
+const activityStatus = document.querySelector("#activity-status");
 const markdown = document.querySelector("#markdown");
 const preview = document.querySelector("#preview-panel");
 const editorDialog = document.querySelector("#editor-dialog");
 const dialogMarkdown = document.querySelector("#dialog-markdown");
 const dialogPreview = document.querySelector("#dialog-preview");
+let statusTimeout;
+
+function showActivity(message) {
+  window.clearTimeout(statusTimeout);
+  activityStatus.textContent = message;
+  activityStatus.hidden = false;
+  statusTimeout = window.setTimeout(() => {
+    activityStatus.hidden = true;
+  }, 2400);
+}
 
 function escapeHtml(value) {
   return value.replace(/[&<>"']/g, (character) => ({
@@ -68,16 +76,20 @@ function downloadMarkdown() {
   }, 150);
 }
 
-document.querySelector("#apply-selector").addEventListener("click", () => {
-  const value = selector.value.trim() || "whole page";
-  pickerStatus.textContent = value === "whole page" ? "Whole page" : "Selector active";
-  selectorMessage.textContent = `Prototype selection applied: ${value}.`;
+document.querySelector("#start-picker").addEventListener("click", () => {
+  showActivity("Element picker activated (prototype simulation).");
 });
 
-document.querySelector("#start-picker").addEventListener("click", () => {
-  pickerStatus.textContent = "Picker active";
-  selectorMessage.textContent = "Prototype picker: hovering the page would highlight elements; a click would set the selector.";
-  document.querySelector("#start-picker").querySelector("small").textContent = "Waiting for an element click (simulated)";
+document.querySelector("#copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(markdown.value);
+    showActivity("Markdown copied to the clipboard.");
+  } catch {
+    markdown.focus();
+    markdown.select();
+    document.execCommand("copy");
+    showActivity("Markdown copied to the clipboard.");
+  }
 });
 
 document.querySelector("#edit-tab").addEventListener("click", () => {

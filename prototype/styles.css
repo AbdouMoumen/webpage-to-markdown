@@ -55,7 +55,7 @@ h1, h2, p { margin-top: 0; }
 h1 { font-size: 24px; line-height: 1.2; margin-bottom: 0; }
 h2 { font-size: 16px; margin-bottom: 0; }
 
-.prototype-badge, .status-pill {
+.prototype-badge {
   background: #eef0ff;
   border-radius: 999px;
   color: #404cb9;
@@ -65,52 +65,21 @@ h2 { font-size: 16px; margin-bottom: 0; }
   white-space: nowrap;
 }
 
-.selection-card {
-  background: #f7f8fc;
-  border: 1px solid #e1e5f0;
-  border-radius: 12px;
-  display: grid;
-  gap: 10px;
-  padding: 15px;
-}
-
-label { color: #364152; font-size: 12px; font-weight: 700; }
-
-.selector-row { display: flex; gap: 8px; }
-
-input, textarea {
+textarea {
   border: 1px solid #cbd3e1;
   border-radius: 8px;
   color: #172033;
   outline: none;
 }
 
-input { min-width: 0; padding: 9px 10px; width: 100%; }
-
-input:focus, textarea:focus {
+textarea:focus {
   border-color: #5361d9;
   box-shadow: 0 0 0 3px rgb(83 97 217 / 16%);
 }
 
-.helper { color: #667085; font-size: 12px; line-height: 1.45; margin: 0; }
-
-.picker-button {
-  align-items: center;
-  background: #fff;
-  border: 1px dashed #9ca8e8;
-  border-radius: 9px;
-  color: #303b92;
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  text-align: left;
-}
-
-.picker-button:hover { background: #f1f3ff; }
-.picker-button small { color: #667085; display: block; margin-top: 2px; }
-.picker-icon { font-size: 23px; }
-
 .editor-section { display: grid; gap: 10px; }
+.editor-tools { display: flex; gap: 7px; }
+.activity-status { color: #5361d9; font-size: 12px; margin: -2px 0 0; }
 
 .tabs { border-bottom: 1px solid #dfe4ee; display: flex; gap: 18px; }
 
