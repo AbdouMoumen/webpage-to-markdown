@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page to Markdown UI prototype</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section id="popup" class="popup" aria-labelledby="app-title">
+        <header class="popup-header">
+          <div>
+            <p class="eyebrow">PAGE TO MARKDOWN</p>
+            <h1 id="app-title">Capture exactly what you need</h1>
+          </div>
+          <span class="prototype-badge">Prototype</span>
+        </header>
+
+        <section class="selection-card" aria-labelledby="selection-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">CONTENT SOURCE</p>
+              <h2 id="selection-title">Choose an area</h2>
+            </div>
+            <span id="picker-status" class="status-pill">Whole page</span>
+          </div>
+
+          <label for="selector">CSS selector</label>
+          <div class="selector-row">
+            <input id="selector" type="text" value="article" placeholder="article, main, .content">
+            <button id="apply-selector" class="subtle-button" type="button">Apply</button>
+          </div>
+          <p id="selector-message" class="helper">Extract the primary article, or target a specific page section.</p>
+
+          <button id="start-picker" class="picker-button" type="button">
+            <span class="picker-icon" aria-hidden="true">⌖</span>
+            <span>
+              <strong>Pick an element visually</strong>
+              <small>Choose a page area with a click</small>
+            </span>
+          </button>
+        </section>
+
+        <section class="editor-section" aria-labelledby="editor-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">OUTPUT</p>
+              <h2 id="editor-title">Markdown</h2>
+            </div>
+            <button id="expand-editor" class="icon-button" type="button" aria-label="Expand editor">⤢</button>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Output view">
+            <button id="edit-tab" class="tab active" type="button" role="tab" aria-selected="true" aria-controls="edit-panel">Edit Markdown</button>
+            <button id="preview-tab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="preview-panel">Rendered Preview</button>
+          </div>
+
+          <div id="edit-panel" class="tabpanel" role="tabpanel" aria-labelledby="edit-tab">
+            <textarea id="markdown" aria-label="Editable Markdown"># Welcome to Markdown
+
+Turn a focused section of any page into clean, portable notes.
+
+## What is included
+
+- The main article or your selected area
+- Headings, links, lists, and code blocks
+- A source link for reference
+
+> Choose **Rendered Preview** to verify the result before you save it.</textarea>
+          </div>
+          <div id="preview-panel" class="tabpanel preview-panel" role="tabpanel" aria-labelledby="preview-tab" hidden></div>
+        </section>
+
+        <footer class="actions">
+          <button id="download" class="primary-button" type="button">Download .md</button>
+          <button id="reset-prototype" class="text-button" type="button">Reset prototype</button>
+        </footer>
+      </section>
+
+      <section id="closed-state" class="closed-state" hidden aria-live="polite">
+        <div class="download-mark" aria-hidden="true">↓</div>
+        <h2>Download started</h2>
+        <p>In the extension, the popup closes immediately after this action.</p>
+        <button id="reopen-prototype" class="subtle-button" type="button">Reopen prototype</button>
+      </section>
+    </main>
+
+    <dialog id="editor-dialog" aria-labelledby="dialog-title">
+      <form method="dialog" class="dialog-layout">
+        <header class="dialog-header">
+          <div>
+            <p class="eyebrow">EXPANDED EDITOR</p>
+            <h2 id="dialog-title">Review your Markdown</h2>
+          </div>
+          <button id="close-dialog" class="icon-button" value="cancel" aria-label="Close editor">×</button>
+        </header>
+        <div class="tabs" role="tablist" aria-label="Expanded output view">
+          <button id="dialog-edit-tab" class="tab active" type="button" role="tab" aria-selected="true">Edit Markdown</button>
+          <button id="dialog-preview-tab" class="tab" type="button" role="tab" aria-selected="false">Rendered Preview</button>
+        </div>
+        <textarea id="dialog-markdown" aria-label="Expanded editable Markdown"></textarea>
+        <article id="dialog-preview" class="dialog-preview" hidden></article>
+        <footer class="dialog-actions">
+          <button id="dialog-download" class="primary-button" type="button">Download .md</button>
+          <button value="cancel" class="subtle-button">Close</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
