@@ -37,8 +37,8 @@ For Microsoft Edge, use `edge://extensions`, enable **Developer mode**, select
 
 - **Pick page element** opens a visual picker on normal web pages. The extension
   popup closes so you can select an element; it highlights the element under the
-  pointer, converts the clicked element, and saves the result for the popup when
-  you reopen it. Press <kbd>Escape</kbd> to cancel.
+  pointer, converts the clicked element, and saves the result for that same tab
+  when you reopen the popup. Press <kbd>Escape</kbd> to cancel.
 - **Expand editor** opens a larger editor with editable Markdown and a locally
   rendered, sanitized preview. Changes remain synchronized with the compact popup.
 - **Copy Markdown** is available in both editors. **Download .md** starts the

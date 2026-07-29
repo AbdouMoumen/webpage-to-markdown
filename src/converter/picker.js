@@ -58,7 +58,10 @@ function createPicker() {
   }
 
   async function report(result) {
-    await chrome.runtime.sendMessage({ result, type: PICKER_RESULT });
+    const response = await chrome.runtime.sendMessage({ result, type: PICKER_RESULT });
+    if (!response?.ok) {
+      throw new Error(response?.error ?? "The picker result could not be saved.");
+    }
   }
 
   async function selectElement(element) {
@@ -71,10 +74,14 @@ function createPicker() {
         title: document.title
       });
     } catch (error) {
-      await report({
-        message: error instanceof Error ? error.message : "Unable to convert the selected element.",
-        state: "error"
-      });
+      try {
+        await report({
+          message: error instanceof Error ? error.message : "Unable to convert the selected element.",
+          state: "error"
+        });
+      } catch (reportError) {
+        console.error("Page to Markdown could not save the picker error.", reportError);
+      }
     } finally {
       cleanup();
     }

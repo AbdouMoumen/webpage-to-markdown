@@ -1,4 +1,9 @@
-import { DOWNLOAD_MARKDOWN, PICKER_RESULT_KEY } from "../shared/messages.js";
+import {
+  DOWNLOAD_MARKDOWN,
+  PICKER_CLEAR,
+  PICKER_RESULTS_KEY,
+  PICKER_START
+} from "../shared/messages.js";
 import { renderMarkdown } from "./preview.js";
 
 const CONVERT_MESSAGE = "page-to-markdown:convert";
@@ -102,10 +107,40 @@ async function currentTab() {
   return tab;
 }
 
+function pickerResultForActiveTab(results) {
+  return results?.[String(activeTab.id)] ?? null;
+}
+
+function applyPickerResult(result) {
+  if (!result) {
+    return "none";
+  }
+
+  if (result.state === "selected") {
+    setOutput(result.markdown);
+    setStatus("Selected element converted. Edit, copy, or download the Markdown.", "success");
+    return "selected";
+  }
+
+  if (result.state === "picking") {
+    setStatus(result.message, "loading");
+    return "picking";
+  }
+
+  setStatus(
+    result.message ?? (result.state === "cancelled" ? "Element picker cancelled." : "The selected element could not be converted."),
+    result.state === "cancelled" ? "loading" : "error"
+  );
+  return result.state;
+}
+
 async function clearPickerResultForActiveTab() {
-  const stored = await chrome.storage.session.get(PICKER_RESULT_KEY);
-  if (stored[PICKER_RESULT_KEY]?.tabId === activeTab.id) {
-    await chrome.storage.session.remove(PICKER_RESULT_KEY);
+  const result = await chrome.runtime.sendMessage({
+    tabId: activeTab.id,
+    type: PICKER_CLEAR
+  });
+  if (!result?.ok) {
+    throw new Error(result?.error ?? "Unable to clear the picker state.");
   }
 }
 
@@ -149,12 +184,25 @@ async function startPicker() {
   setStatus("Choose an element on the page. Press Escape to cancel.", "loading");
 
   try {
+    const startResult = await chrome.runtime.sendMessage({
+      tabId: activeTab.id,
+      type: PICKER_START
+    });
+    if (!startResult?.ok) {
+      throw new Error(startResult?.error ?? "The picker could not be prepared.");
+    }
+
     await chrome.scripting.executeScript({
       files: ["picker.js"],
       target: { tabId: activeTab.id }
     });
     window.close();
   } catch (error) {
+    try {
+      await clearPickerResultForActiveTab();
+    } catch (clearError) {
+      console.error("Page to Markdown could not clear the failed picker state.", clearError);
+    }
     const message = error instanceof Error ? error.message : "The picker could not start.";
     setStatus(`Could not start the element picker: ${message}`, "error");
     elements.pickElement.disabled = false;
@@ -190,38 +238,29 @@ async function downloadMarkdown() {
 }
 
 async function loadPickerResult() {
-  const stored = await chrome.storage.session.get(PICKER_RESULT_KEY);
-  const result = stored[PICKER_RESULT_KEY];
-  if (!result || result.tabId !== activeTab.id) {
-    return false;
-  }
-
-  if (result.state === "selected") {
-    setOutput(result.markdown);
-    setStatus("Selected element converted. Edit, copy, or download the Markdown.", "success");
-    return true;
-  }
-
-  if (result.state === "cancelled") {
-    setStatus(result.message ?? "Element picker cancelled.", "loading");
-  } else {
-    setStatus(result.message ?? "The selected element could not be converted.", "error");
-  }
-
-  return false;
+  const stored = await chrome.storage.session.get(PICKER_RESULTS_KEY);
+  return applyPickerResult(pickerResultForActiveTab(stored[PICKER_RESULTS_KEY]));
 }
 
 async function initialize() {
   try {
     activeTab = await currentTab();
-    const loadedSelection = await loadPickerResult();
-    if (!loadedSelection) {
+    const pickerState = await loadPickerResult();
+    if (pickerState === "none") {
       await convertCurrentPage();
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "The current page could not be prepared.";
     setStatus(`Could not prepare this page: ${message}`, "error");
   }
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "session" || !changes[PICKER_RESULTS_KEY] || !activeTab) {
+      return;
+    }
+
+    applyPickerResult(pickerResultForActiveTab(changes[PICKER_RESULTS_KEY].newValue));
+  });
 }
 
 elements.convert.addEventListener("click", () => void convertCurrentPage());
