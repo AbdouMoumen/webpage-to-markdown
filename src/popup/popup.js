@@ -1,8 +1,12 @@
 import {
   DOWNLOAD_MARKDOWN,
+  GET_MARKDOWN,
+  MARKDOWN_STATES_KEY,
+  OPEN_EDITOR,
   PICKER_CLEAR,
   PICKER_RESULTS_KEY,
-  PICKER_START
+  PICKER_START,
+  UPDATE_MARKDOWN
 } from "../shared/messages.js";
 import { renderMarkdown } from "./preview.js";
 
@@ -14,14 +18,6 @@ const elements = {
   activityStatus: document.querySelector("#activity-status"),
   convert: document.querySelector("#convert"),
   copy: document.querySelector("#copy"),
-  dialog: document.querySelector("#editor-dialog"),
-  dialogActivityStatus: document.querySelector("#dialog-activity-status"),
-  dialogCopy: document.querySelector("#dialog-copy"),
-  dialogDownload: document.querySelector("#dialog-download"),
-  dialogEditTab: document.querySelector("#dialog-edit-tab"),
-  dialogMarkdown: document.querySelector("#dialog-markdown"),
-  dialogPreview: document.querySelector("#dialog-preview"),
-  dialogPreviewTab: document.querySelector("#dialog-preview-tab"),
   download: document.querySelector("#download"),
   editPanel: document.querySelector("#edit-panel"),
   editTab: document.querySelector("#edit-tab"),
@@ -34,6 +30,7 @@ const elements = {
 };
 
 let activeTab;
+let saveTimer;
 const statusTimeouts = new Map();
 
 function setStatus(message, state = "loading") {
@@ -50,15 +47,45 @@ function showActivity(element, message) {
   }, 2400));
 }
 
-function setOutput(markdown) {
+function tabMarkdownState(states) {
+  return states?.[String(activeTab.id)] ?? null;
+}
+
+async function saveMarkdown(markdown = elements.markdown.value) {
+  const result = await chrome.runtime.sendMessage({
+    state: { markdown, sourceUrl: activeTab.url ?? "" },
+    tabId: activeTab.id,
+    type: UPDATE_MARKDOWN
+  });
+  if (!result?.ok) {
+    throw new Error(result?.error ?? "Unable to save Markdown.");
+  }
+}
+
+function scheduleSave() {
+  window.clearTimeout(saveTimer);
+  saveTimer = window.setTimeout(() => {
+    saveMarkdown().catch((error) => {
+      setStatus(error instanceof Error ? error.message : "Unable to save Markdown.", "error");
+    });
+  }, 350);
+}
+
+function setOutput(markdown, persist = true) {
   elements.markdown.value = markdown;
   elements.markdown.disabled = false;
   elements.copy.disabled = false;
   elements.download.disabled = false;
+  if (persist) {
+    void saveMarkdown(markdown).catch((error) => {
+      setStatus(error instanceof Error ? error.message : "Unable to save Markdown.", "error");
+    });
+  }
 }
 
 function setLoading(isLoading) {
   elements.convert.disabled = isLoading;
+  elements.expand.disabled = isLoading;
   elements.pickElement.disabled = isLoading;
   if (isLoading) {
     elements.copy.disabled = true;
@@ -80,20 +107,6 @@ function setMainTab(view) {
   }
 }
 
-function setDialogTab(view) {
-  const isEditing = view === "edit";
-  elements.dialogEditTab.classList.toggle("active", isEditing);
-  elements.dialogPreviewTab.classList.toggle("active", !isEditing);
-  elements.dialogEditTab.setAttribute("aria-selected", String(isEditing));
-  elements.dialogPreviewTab.setAttribute("aria-selected", String(!isEditing));
-  elements.dialogMarkdown.hidden = !isEditing;
-  elements.dialogPreview.hidden = isEditing;
-
-  if (!isEditing) {
-    elements.dialogPreview.innerHTML = renderMarkdown(elements.dialogMarkdown.value, window);
-  }
-}
-
 function isRestrictedPage(tab) {
   return !tab.url || PICKER_RESTRICTED_URL.test(tab.url) || WEB_STORE_URL.test(tab.url);
 }
@@ -105,10 +118,6 @@ async function currentTab() {
   }
 
   return tab;
-}
-
-function pickerResultForActiveTab(results) {
-  return results?.[String(activeTab.id)] ?? null;
 }
 
 function applyPickerResult(result) {
@@ -209,17 +218,16 @@ async function startPicker() {
   }
 }
 
-async function copyMarkdown(source, statusElement) {
+async function copyMarkdown() {
   try {
-    await navigator.clipboard.writeText(source.value);
-    showActivity(statusElement, "Markdown copied to the clipboard.");
-  } catch (error) {
-    source.focus();
-    source.select();
-    const copied = document.execCommand("copy");
+    await navigator.clipboard.writeText(elements.markdown.value);
+    showActivity(elements.activityStatus, "Markdown copied to the clipboard.");
+  } catch {
+    elements.markdown.focus();
+    elements.markdown.select();
     showActivity(
-      statusElement,
-      copied ? "Markdown copied to the clipboard." : "Clipboard access was unavailable. Select the Markdown and copy it manually."
+      elements.activityStatus,
+      document.execCommand("copy") ? "Markdown copied to the clipboard." : "Clipboard access was unavailable. Select the Markdown and copy it manually."
     );
   }
 }
@@ -237,35 +245,73 @@ async function downloadMarkdown() {
   window.close();
 }
 
+async function openEditor() {
+  const result = await chrome.runtime.sendMessage({
+    state: { markdown: elements.markdown.value, sourceUrl: activeTab.url ?? "" },
+    tabId: activeTab.id,
+    type: OPEN_EDITOR
+  });
+  if (!result?.ok) {
+    throw new Error(result?.error ?? "The editor could not be opened.");
+  }
+}
+
 async function loadPickerResult() {
   const stored = await chrome.storage.session.get(PICKER_RESULTS_KEY);
-  return applyPickerResult(pickerResultForActiveTab(stored[PICKER_RESULTS_KEY]));
+  return applyPickerResult(tabMarkdownState(stored[PICKER_RESULTS_KEY]));
+}
+
+async function loadSavedMarkdown() {
+  const result = await chrome.runtime.sendMessage({ tabId: activeTab.id, type: GET_MARKDOWN });
+  if (!result?.ok || !result.state || result.state.sourceUrl !== activeTab.url) {
+    return false;
+  }
+
+  setOutput(result.state.markdown, false);
+  setStatus("Restored Markdown for this tab.", "success");
+  return true;
 }
 
 async function initialize() {
+  setLoading(true);
   try {
     activeTab = await currentTab();
     const pickerState = await loadPickerResult();
     if (pickerState === "none") {
-      await convertCurrentPage();
+      const restored = await loadSavedMarkdown();
+      if (!restored) {
+        await convertCurrentPage();
+      }
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "The current page could not be prepared.";
     setStatus(`Could not prepare this page: ${message}`, "error");
+  } finally {
+    setLoading(false);
+  }
+}
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "session" || !activeTab) {
+    return;
   }
 
-  chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== "session" || !changes[PICKER_RESULTS_KEY] || !activeTab) {
-      return;
-    }
+  if (changes[PICKER_RESULTS_KEY]) {
+    applyPickerResult(tabMarkdownState(changes[PICKER_RESULTS_KEY].newValue));
+  }
 
-    applyPickerResult(pickerResultForActiveTab(changes[PICKER_RESULTS_KEY].newValue));
-  });
-}
+  if (changes[MARKDOWN_STATES_KEY]) {
+    const state = tabMarkdownState(changes[MARKDOWN_STATES_KEY].newValue);
+    if (state && state.sourceUrl === activeTab.url && state.markdown !== elements.markdown.value) {
+      setOutput(state.markdown, false);
+      setStatus("Markdown updated from the editor.", "success");
+    }
+  }
+});
 
 elements.convert.addEventListener("click", () => void convertCurrentPage());
 elements.pickElement.addEventListener("click", () => void startPicker());
-elements.copy.addEventListener("click", () => void copyMarkdown(elements.markdown, elements.activityStatus));
+elements.copy.addEventListener("click", () => void copyMarkdown());
 elements.download.addEventListener("click", () => {
   downloadMarkdown().catch((error) => {
     const message = error instanceof Error ? error.message : "The download could not be started.";
@@ -278,29 +324,11 @@ elements.markdown.addEventListener("input", () => {
   if (!elements.preview.hidden) {
     elements.preview.innerHTML = renderMarkdown(elements.markdown.value, window);
   }
+  scheduleSave();
 });
 elements.expand.addEventListener("click", () => {
-  elements.dialogMarkdown.value = elements.markdown.value;
-  setDialogTab("edit");
-  elements.dialog.showModal();
-});
-elements.dialogMarkdown.addEventListener("input", () => {
-  elements.markdown.value = elements.dialogMarkdown.value;
-  if (!elements.dialogPreview.hidden) {
-    elements.dialogPreview.innerHTML = renderMarkdown(elements.dialogMarkdown.value, window);
-  }
-  if (!elements.preview.hidden) {
-    elements.preview.innerHTML = renderMarkdown(elements.markdown.value, window);
-  }
-});
-elements.dialogEditTab.addEventListener("click", () => setDialogTab("edit"));
-elements.dialogPreviewTab.addEventListener("click", () => setDialogTab("preview"));
-elements.dialogCopy.addEventListener("click", () => void copyMarkdown(elements.dialogMarkdown, elements.dialogActivityStatus));
-elements.dialogDownload.addEventListener("click", () => {
-  elements.markdown.value = elements.dialogMarkdown.value;
-  downloadMarkdown().catch((error) => {
-    const message = error instanceof Error ? error.message : "The download could not be started.";
-    showActivity(elements.dialogActivityStatus, `Could not start download: ${message}`);
+  openEditor().catch((error) => {
+    setStatus(error instanceof Error ? error.message : "The editor could not be opened.", "error");
   });
 });
 

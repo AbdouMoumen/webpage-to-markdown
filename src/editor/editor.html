@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page to Markdown editor</title>
+    <link rel="stylesheet" href="editor.css">
+  </head>
+  <body>
+    <main class="editor" aria-labelledby="editor-title">
+      <header class="editor-header">
+        <div>
+          <p class="eyebrow">PAGE TO MARKDOWN</p>
+          <h1 id="editor-title">Markdown editor</h1>
+        </div>
+        <p id="status" class="status" role="status">Loading Markdown...</p>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="Editor view">
+        <button id="edit-tab" class="tab active" type="button" role="tab" aria-selected="true" aria-controls="edit-panel">Edit Markdown</button>
+        <button id="preview-tab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="preview-panel">Rendered Preview</button>
+      </div>
+
+      <section id="edit-panel" role="tabpanel" aria-labelledby="edit-tab">
+        <textarea id="markdown" spellcheck="false" aria-label="Editable Markdown"></textarea>
+      </section>
+      <article id="preview-panel" class="preview" role="tabpanel" aria-labelledby="preview-tab" hidden></article>
+
+      <footer class="actions">
+        <button id="copy" class="subtle-button" type="button">Copy Markdown</button>
+        <button id="download" class="primary-button" type="button">Download .md</button>
+        <button id="close" class="subtle-button" type="button">Close</button>
+      </footer>
+    </main>
+    <script src="editor.js"></script>
+  </body>
+</html>

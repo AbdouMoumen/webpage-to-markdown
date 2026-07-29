@@ -1,5 +1,9 @@
 export const DOWNLOAD_MARKDOWN = "page-to-markdown:download-markdown";
+export const GET_MARKDOWN = "page-to-markdown:get-markdown";
+export const OPEN_EDITOR = "page-to-markdown:open-editor";
 export const PICKER_CLEAR = "page-to-markdown:picker-clear";
 export const PICKER_RESULT = "page-to-markdown:picker-result";
 export const PICKER_RESULTS_KEY = "page-to-markdown:picker-results";
 export const PICKER_START = "page-to-markdown:picker-start";
+export const UPDATE_MARKDOWN = "page-to-markdown:update-markdown";
+export const MARKDOWN_STATES_KEY = "page-to-markdown:markdown-states";

@@ -14,6 +14,7 @@ await build({
   entryPoints: {
     background: resolve(source, "background/service-worker.js"),
     converter: resolve(source, "converter/converter.js"),
+    editor: resolve(source, "editor/editor.js"),
     picker: resolve(source, "converter/picker.js"),
     popup: resolve(source, "popup/popup.js")
   },
@@ -25,6 +26,8 @@ await build({
 
 await Promise.all([
   cp(resolve(source, "manifest.json"), resolve(output, "manifest.json")),
+  cp(resolve(source, "editor/editor.html"), resolve(output, "editor.html")),
+  cp(resolve(source, "editor/editor.css"), resolve(output, "editor.css")),
   cp(resolve(source, "popup/popup.html"), resolve(output, "popup.html")),
   cp(resolve(source, "popup/popup.css"), resolve(output, "popup.css"))
 ]);

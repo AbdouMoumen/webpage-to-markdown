@@ -1,0 +1,98 @@
+:root {
+  color: #172033;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f7f8fc;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 600px; }
+button, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.editor {
+  display: grid;
+  gap: 16px;
+  min-height: 100vh;
+  padding: 26px;
+}
+
+.editor-header, .actions {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  color: #5361d9;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  margin: 0 0 4px;
+}
+
+h1 { font-size: 24px; line-height: 1.2; margin: 0; }
+
+.status {
+  color: #596579;
+  font-size: 13px;
+  line-height: 1.35;
+  margin: 0;
+  text-align: right;
+}
+.status[data-state="error"] { color: #b42318; }
+.status[data-state="success"] { color: #137333; }
+
+.tabs { border-bottom: 1px solid #dfe4ee; display: flex; gap: 18px; }
+.tab {
+  background: transparent;
+  border: 0;
+  color: #667085;
+  font-size: 13px;
+  padding: 8px 1px;
+}
+.tab.active { border-bottom: 2px solid #4654cc; color: #28358e; font-weight: 750; }
+
+#edit-panel, .preview { min-height: 0; }
+textarea {
+  background: #fff;
+  border: 1px solid #ccd2df;
+  border-radius: 8px;
+  color: #172033;
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  height: calc(100vh - 210px);
+  min-height: 400px;
+  padding: 14px;
+  resize: none;
+  width: 100%;
+}
+textarea:focus {
+  border-color: #5361d9;
+  box-shadow: 0 0 0 3px rgb(83 97 217 / 18%);
+  outline: none;
+}
+
+.preview {
+  background: #fff;
+  border: 1px solid #e1e5f0;
+  border-radius: 8px;
+  color: #364152;
+  font-size: 15px;
+  height: calc(100vh - 210px);
+  line-height: 1.6;
+  min-height: 400px;
+  overflow: auto;
+  padding: 18px;
+}
+.preview h1 { font-size: 25px; }
+.preview h2 { margin-top: 24px; }
+.preview blockquote { border-left: 3px solid #98a3df; color: #5f6b7d; margin: 16px 0; padding-left: 14px; }
+.preview code { background: #eef0f6; border-radius: 3px; padding: 1px 4px; }
+.preview pre { background: #1d2539; border-radius: 7px; color: #fff; overflow: auto; padding: 12px; }
+
+.actions { border-top: 1px solid #e6e9f1; padding-top: 16px; }
+.primary-button, .subtle-button { border-radius: 8px; font-size: 13px; font-weight: 700; }
+.primary-button { background: #4350c5; border: 1px solid #4350c5; color: #fff; padding: 10px 13px; }
+.primary-button:hover { background: #3540aa; }
+.subtle-button { background: #fff; border: 1px solid #c8d0df; color: #364152; padding: 10px 13px; }
+.subtle-button:hover { background: #f1f3ff; }

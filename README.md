@@ -39,8 +39,10 @@ For Microsoft Edge, use `edge://extensions`, enable **Developer mode**, select
   popup closes so you can select an element; it highlights the element under the
   pointer, converts the clicked element, and saves the result for that same tab
   when you reopen the popup. Press <kbd>Escape</kbd> to cancel.
-- **Expand editor** opens a larger editor with editable Markdown and a locally
-  rendered, sanitized preview. Changes remain synchronized with the compact popup.
+- **Expand editor** opens or focuses a separate, resizable desktop editor window
+  for the current tab. It has editable Markdown, a locally rendered, sanitized
+  preview, and copy/download controls. Changes remain synchronized with the
+  compact popup.
 - **Copy Markdown** is available in both editors. **Download .md** starts the
   browser download through the extension, then dismisses the popup promptly.
 

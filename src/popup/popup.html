@@ -47,30 +47,6 @@
       </footer>
     </main>
 
-    <dialog id="editor-dialog" aria-labelledby="dialog-title">
-      <form method="dialog" class="dialog-layout">
-        <header class="dialog-header">
-          <div>
-            <p class="eyebrow">EXPANDED EDITOR</p>
-            <h2 id="dialog-title">Review your Markdown</h2>
-          </div>
-          <button class="icon-button" value="cancel" aria-label="Close editor" title="Close editor">×</button>
-        </header>
-        <div class="tabs" role="tablist" aria-label="Expanded output view">
-          <button id="dialog-edit-tab" class="tab active" type="button" role="tab" aria-selected="true">Edit Markdown</button>
-          <button id="dialog-preview-tab" class="tab" type="button" role="tab" aria-selected="false">Rendered Preview</button>
-        </div>
-        <p id="dialog-activity-status" class="activity-status" role="status" hidden></p>
-        <textarea id="dialog-markdown" spellcheck="false" aria-label="Expanded editable Markdown"></textarea>
-        <article id="dialog-preview" class="dialog-preview" hidden></article>
-        <footer class="dialog-actions">
-          <button id="dialog-copy" class="subtle-button" type="button">Copy Markdown</button>
-          <button id="dialog-download" class="primary-button" type="button">Download .md</button>
-          <button value="cancel" class="subtle-button">Close</button>
-        </footer>
-      </form>
-    </dialog>
-
     <script src="popup.js"></script>
   </body>
 </html>
