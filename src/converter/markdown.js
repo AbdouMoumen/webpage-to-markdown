@@ -77,15 +77,27 @@ function markdownTitle(title) {
   return title.replace(/[\r\n#]+/g, " ").replace(/\s+/g, " ").trim() || "Untitled page";
 }
 
+function composeMarkdown(title, sourceUrl, html) {
+  const markdown = normalizeMarkdown(createTurndownService().turndown(html));
+  const source = sourceUrl ? `Source: [${sourceUrl}](${sourceUrl})` : "";
+  const body = markdown || "_No readable page content was found._";
+
+  return [`# ${markdownTitle(title)}`, source, body].filter(Boolean).join("\n\n");
+}
+
 export function createPageMarkdown(document) {
   const cleanedDocument = cleanDocument(document);
   const article = new Readability(cleanedDocument, { charThreshold: 0 }).parse();
   const title = markdownTitle(article?.title ?? document.title);
   const content = article?.content ?? fallbackContent(cleanedDocument);
-  const markdown = normalizeMarkdown(createTurndownService().turndown(content));
-  const sourceUrl = document.location?.href ?? "";
-  const source = sourceUrl ? `Source: [${sourceUrl}](${sourceUrl})` : "";
-  const body = markdown || "_No readable page content was found._";
 
-  return [`# ${title}`, source, body].filter(Boolean).join("\n\n");
+  return composeMarkdown(title, document.location?.href ?? "", content);
+}
+
+export function createSelectedElementMarkdown(element, document) {
+  const container = document.createElement("div");
+  container.append(element.cloneNode(true));
+  container.querySelectorAll(REMOVABLE_SELECTORS.join(",")).forEach((removable) => removable.remove());
+
+  return composeMarkdown(document.title, document.location?.href ?? "", container.innerHTML);
 }

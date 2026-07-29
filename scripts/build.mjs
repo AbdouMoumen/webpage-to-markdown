@@ -12,7 +12,9 @@ await mkdir(output, { recursive: true });
 await build({
   bundle: true,
   entryPoints: {
+    background: resolve(source, "background/service-worker.js"),
     converter: resolve(source, "converter/converter.js"),
+    picker: resolve(source, "converter/picker.js"),
     popup: resolve(source, "popup/popup.js")
   },
   format: "iife",

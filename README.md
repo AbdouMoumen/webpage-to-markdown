@@ -33,6 +33,20 @@ The popup converts the current tab immediately. Review or edit the Markdown in t
 For Microsoft Edge, use `edge://extensions`, enable **Developer mode**, select
 **Load unpacked**, and choose `dist`.
 
+## Use the popup
+
+- **Pick page element** opens a visual picker on normal web pages. The extension
+  popup closes so you can select an element; it highlights the element under the
+  pointer, converts the clicked element, and saves the result for the popup when
+  you reopen it. Press <kbd>Escape</kbd> to cancel.
+- **Expand editor** opens a larger editor with editable Markdown and a locally
+  rendered, sanitized preview. Changes remain synchronized with the compact popup.
+- **Copy Markdown** is available in both editors. **Download .md** starts the
+  browser download through the extension, then dismisses the popup promptly.
+
+Chrome and Edge do not permit scripts on browser-internal pages, extension pages,
+or the Chrome Web Store, so conversion and element picking are unavailable there.
+
 ## Submit to Microsoft Edge Add-ons
 
 1. Run `npm run package`.

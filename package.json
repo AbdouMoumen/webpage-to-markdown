@@ -1,6 +1,6 @@
 {
   "name": "page-to-markdown",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
+    "dompurify": "^3.4.12",
+    "marked": "^15.0.12",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2"
   },

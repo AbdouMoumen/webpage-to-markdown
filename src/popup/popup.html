@@ -7,22 +7,70 @@
     <link rel="stylesheet" href="popup.css">
   </head>
   <body>
-    <main class="popup">
-      <header>
-        <p class="eyebrow">PAGE TO MARKDOWN</p>
-        <h1>Clean Markdown</h1>
+    <main class="popup" aria-labelledby="app-title">
+      <header class="popup-header">
+        <div>
+          <p class="eyebrow">PAGE TO MARKDOWN</p>
+          <h1 id="app-title">Clean Markdown</h1>
+        </div>
         <p id="status" class="status" role="status">Preparing page conversion...</p>
       </header>
 
-      <label class="output-label" for="markdown">Markdown preview</label>
-      <textarea id="markdown" spellcheck="false" aria-label="Editable Markdown output" placeholder="Your converted page will appear here." disabled></textarea>
+      <section class="editor-section" aria-labelledby="editor-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">OUTPUT</p>
+            <h2 id="editor-title">Markdown</h2>
+          </div>
+          <div class="editor-tools">
+            <button id="pick-element" class="icon-button" type="button" aria-label="Pick page element" title="Pick page element">⌖</button>
+            <button id="expand-editor" class="icon-button" type="button" aria-label="Expand editor" title="Expand editor">⤢</button>
+          </div>
+        </div>
+        <p id="activity-status" class="activity-status" role="status" hidden></p>
 
-      <div class="actions">
-        <button id="convert" class="secondary" type="button">Convert again</button>
-        <button id="copy" type="button" disabled>Copy Markdown</button>
-        <button id="download" type="button" disabled>Download .md</button>
-      </div>
+        <div class="tabs" role="tablist" aria-label="Output view">
+          <button id="edit-tab" class="tab active" type="button" role="tab" aria-selected="true" aria-controls="edit-panel">Edit Markdown</button>
+          <button id="preview-tab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="preview-panel">Rendered Preview</button>
+        </div>
+
+        <div id="edit-panel" class="tabpanel" role="tabpanel" aria-labelledby="edit-tab">
+          <textarea id="markdown" spellcheck="false" aria-label="Editable Markdown output" placeholder="Your converted page will appear here." disabled></textarea>
+        </div>
+        <article id="preview-panel" class="tabpanel preview-panel" role="tabpanel" aria-labelledby="preview-tab" hidden></article>
+      </section>
+
+      <footer class="actions">
+        <button id="convert" class="subtle-button" type="button">Convert again</button>
+        <button id="copy" class="subtle-button" type="button" disabled>Copy Markdown</button>
+        <button id="download" class="primary-button" type="button" disabled>Download .md</button>
+      </footer>
     </main>
+
+    <dialog id="editor-dialog" aria-labelledby="dialog-title">
+      <form method="dialog" class="dialog-layout">
+        <header class="dialog-header">
+          <div>
+            <p class="eyebrow">EXPANDED EDITOR</p>
+            <h2 id="dialog-title">Review your Markdown</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Close editor" title="Close editor">×</button>
+        </header>
+        <div class="tabs" role="tablist" aria-label="Expanded output view">
+          <button id="dialog-edit-tab" class="tab active" type="button" role="tab" aria-selected="true">Edit Markdown</button>
+          <button id="dialog-preview-tab" class="tab" type="button" role="tab" aria-selected="false">Rendered Preview</button>
+        </div>
+        <p id="dialog-activity-status" class="activity-status" role="status" hidden></p>
+        <textarea id="dialog-markdown" spellcheck="false" aria-label="Expanded editable Markdown"></textarea>
+        <article id="dialog-preview" class="dialog-preview" hidden></article>
+        <footer class="dialog-actions">
+          <button id="dialog-copy" class="subtle-button" type="button">Copy Markdown</button>
+          <button id="dialog-download" class="primary-button" type="button">Download .md</button>
+          <button value="cancel" class="subtle-button">Close</button>
+        </footer>
+      </form>
+    </dialog>
+
     <script src="popup.js"></script>
   </body>
 </html>

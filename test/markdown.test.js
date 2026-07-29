@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { JSDOM } from "jsdom";
-import { createPageMarkdown } from "../src/converter/markdown.js";
+import { createPageMarkdown, createSelectedElementMarkdown } from "../src/converter/markdown.js";
 
 test("converts readable content while removing page chrome", () => {
   const document = new JSDOM(
@@ -44,4 +44,25 @@ test("returns useful Markdown when Readability cannot identify an article", () =
 
   assert.match(markdown, /^# Small page/m);
   assert.match(markdown, /Short but useful content\./);
+});
+
+test("converts only a selected element and strips page chrome within it", () => {
+  const document = new JSDOM(
+    `<!doctype html>
+      <title>Selected section</title>
+      <article id="target">
+        <h2>Keep this heading</h2>
+        <p>Selected content.</p>
+        <button>Do not keep</button>
+      </article>
+      <aside>Do not include outside content.</aside>`,
+    { url: "https://example.com/selected" }
+  ).window.document;
+
+  const markdown = createSelectedElementMarkdown(document.querySelector("#target"), document);
+
+  assert.match(markdown, /^# Selected section/m);
+  assert.match(markdown, /Keep this heading/);
+  assert.match(markdown, /Selected content\./);
+  assert.doesNotMatch(markdown, /Do not keep|Do not include outside content/);
 });
