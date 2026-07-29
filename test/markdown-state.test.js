@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { markdownStateForTab, removeMarkdownState, setMarkdownState } from "../src/background/markdown-state.js";
+import {
+  isMarkdownStateReady,
+  markdownStateForTab,
+  removeMarkdownState,
+  setMarkdownState
+} from "../src/background/markdown-state.js";
 
 test("stores Markdown independently for each tab", () => {
   const first = setMarkdownState({}, 101, { markdown: "# First", sourceUrl: "https://example.com/first" });
@@ -8,6 +13,7 @@ test("stores Markdown independently for each tab", () => {
 
   assert.equal(markdownStateForTab(states, 101).markdown, "# First");
   assert.equal(markdownStateForTab(states, 202).sourceUrl, "https://example.com/second");
+  assert.equal(isMarkdownStateReady(markdownStateForTab(states, 101)), true);
 });
 
 test("removing closed-tab Markdown preserves other editor state", () => {
@@ -20,4 +26,9 @@ test("removing closed-tab Markdown preserves other editor state", () => {
 
   assert.equal(markdownStateForTab(remaining, 101), null);
   assert.equal(markdownStateForTab(remaining, 202).markdown, "# Second");
+});
+
+test("does not treat an incomplete state as editor-ready", () => {
+  assert.equal(isMarkdownStateReady({ markdown: "# Draft" }), false);
+  assert.equal(isMarkdownStateReady({ markdown: "# Draft", ready: true }), true);
 });

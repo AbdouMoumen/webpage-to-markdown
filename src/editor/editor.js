@@ -16,6 +16,7 @@ const elements = {
 
 let sourceUrl = "";
 let saveTimer;
+let loadingTimer;
 
 function setStatus(message, state = "loading") {
   elements.status.textContent = message;
@@ -24,6 +25,22 @@ function setStatus(message, state = "loading") {
 
 function stateForTab(states) {
   return states?.[String(tabId)] ?? null;
+}
+
+function applyMarkdownState(state, message) {
+  if (!state?.ready || typeof state.markdown !== "string") {
+    return false;
+  }
+
+  window.clearTimeout(loadingTimer);
+  elements.markdown.disabled = false;
+  elements.markdown.value = state.markdown;
+  sourceUrl = state.sourceUrl;
+  if (!elements.preview.hidden) {
+    elements.preview.innerHTML = renderMarkdown(state.markdown, window);
+  }
+  setStatus(message, "success");
+  return true;
 }
 
 function setTab(view) {
@@ -89,6 +106,7 @@ async function downloadMarkdown() {
 }
 
 async function loadEditor() {
+  elements.markdown.disabled = true;
   if (!Number.isInteger(tabId)) {
     setStatus("This editor window is missing its source tab.", "error");
     elements.markdown.disabled = true;
@@ -96,15 +114,21 @@ async function loadEditor() {
   }
 
   const result = await chrome.runtime.sendMessage({ tabId, type: GET_MARKDOWN });
-  if (!result?.ok || !result.state) {
-    setStatus(result?.error ?? "No Markdown is available for this tab.", "error");
-    elements.markdown.disabled = true;
+  if (!result?.ok) {
+    setStatus(result.error ?? "No Markdown is available for this tab.", "error");
     return;
   }
 
-  elements.markdown.value = result.state.markdown;
-  sourceUrl = result.state.sourceUrl;
-  setStatus("Ready to edit.", "success");
+  if (applyMarkdownState(result.state, "Ready to edit.")) {
+    return;
+  }
+
+  setStatus("Waiting for the page conversion to finish...");
+  loadingTimer = window.setTimeout(() => {
+    if (elements.markdown.disabled) {
+      setStatus("Markdown did not arrive. Return to the popup and convert the page again.", "error");
+    }
+  }, 5000);
 }
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -113,16 +137,11 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 
   const state = stateForTab(changes[MARKDOWN_STATES_KEY].newValue);
-  if (!state || state.markdown === elements.markdown.value) {
+  if (!state?.ready || state.markdown === elements.markdown.value) {
     return;
   }
 
-  elements.markdown.value = state.markdown;
-  sourceUrl = state.sourceUrl;
-  if (!elements.preview.hidden) {
-    elements.preview.innerHTML = renderMarkdown(state.markdown, window);
-  }
-  setStatus("Markdown updated from the popup.", "success");
+  applyMarkdownState(state, "Markdown updated from the popup.");
 });
 
 elements.editTab.addEventListener("click", () => setTab("edit"));

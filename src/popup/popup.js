@@ -30,6 +30,7 @@ const elements = {
 };
 
 let activeTab;
+let pickerState = "none";
 let saveTimer;
 const statusTimeouts = new Map();
 
@@ -122,9 +123,11 @@ async function currentTab() {
 
 function applyPickerResult(result) {
   if (!result) {
+    pickerState = "none";
     return "none";
   }
 
+  pickerState = result.state;
   if (result.state === "selected") {
     setOutput(result.markdown);
     setStatus("Selected element converted. Edit, copy, or download the Markdown.", "success");
@@ -246,13 +249,32 @@ async function downloadMarkdown() {
 }
 
 async function openEditor() {
-  const result = await chrome.runtime.sendMessage({
-    state: { markdown: elements.markdown.value, sourceUrl: activeTab.url ?? "" },
-    tabId: activeTab.id,
-    type: OPEN_EDITOR
-  });
-  if (!result?.ok) {
-    throw new Error(result?.error ?? "The editor could not be opened.");
+  elements.expand.disabled = true;
+  try {
+    if (!elements.markdown.value.trim()) {
+      if (pickerState === "picking") {
+        throw new Error("Select an element or press Escape before opening the editor.");
+      }
+
+      setStatus("Converting the current page before opening the editor...");
+      await convertCurrentPage();
+    }
+
+    if (!elements.markdown.value.trim()) {
+      throw new Error("No Markdown is available for the editor.");
+    }
+
+    await saveMarkdown();
+    const result = await chrome.runtime.sendMessage({
+      state: { markdown: elements.markdown.value, sourceUrl: activeTab.url ?? "" },
+      tabId: activeTab.id,
+      type: OPEN_EDITOR
+    });
+    if (!result?.ok) {
+      throw new Error(result?.error ?? "The editor could not be opened.");
+    }
+  } finally {
+    elements.expand.disabled = false;
   }
 }
 
@@ -263,7 +285,7 @@ async function loadPickerResult() {
 
 async function loadSavedMarkdown() {
   const result = await chrome.runtime.sendMessage({ tabId: activeTab.id, type: GET_MARKDOWN });
-  if (!result?.ok || !result.state || result.state.sourceUrl !== activeTab.url) {
+  if (!result?.ok || !result.state?.ready || result.state.sourceUrl !== activeTab.url) {
     return false;
   }
 

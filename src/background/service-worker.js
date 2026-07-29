@@ -29,6 +29,7 @@ async function updateMarkdownState(tabId, state) {
   await chrome.storage.session.set({
     [MARKDOWN_STATES_KEY]: setMarkdownState(states, tabId, {
       markdown: state.markdown,
+      ready: true,
       sourceUrl: state.sourceUrl ?? markdownStateForTab(states, tabId)?.sourceUrl ?? ""
     })
   });
